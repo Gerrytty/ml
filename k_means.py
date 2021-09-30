@@ -190,7 +190,7 @@ def get_optimal_clusters_number(points):
     plot_k(sis, "Silhouette")
     plt.show()
 
-    return np.argmax(sis) + 2
+    return np.argmax(sis) + 1
 
 
 if __name__ == "__main__":
