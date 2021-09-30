@@ -120,7 +120,7 @@ def clusters_calculate(points, k, plot=False):
         plt.savefig(f"res_{k}.png")
         plt.close()
 
-    s = 0  # intra-cluster distance
+    s = 0  # intra-cluster distance s, ai, bi - нужны для поиска оптимального кол-ва кластеров
     for i, cluster in enumerate(clusters_points):
         cluster_center = new_center(cluster)
         for j, point in enumerate(cluster):
