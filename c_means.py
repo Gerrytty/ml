@@ -3,7 +3,7 @@ import numpy as np
 
 from sklearn.datasets import make_blobs
 
-import imageio
+# import imageio
 import os
 
 
@@ -25,7 +25,7 @@ def dist(a, b):
 def get_r_points(n, k):
     points = []
     X, y_true = make_blobs(n_samples=n, centers=k,
-                           cluster_std=0.6, random_state=0)
+                           cluster_std=0.5, random_state=1)
 
     for xy in X:
         points.append(Point(xy[0], xy[1]))
@@ -68,18 +68,30 @@ def nearest_centroids(points, centers):
                 point.cluster = i
 
 
+# https://algowiki-project.org/ru/%D0%A3%D1%87%D0%B0%D1%81%D1%82%D0%BD%D0%B8%D0%BA:Nikmedoed/%D0%9D%D0%B5%D1%87%D0%B5%D1%82%D0%BA%D0%B8%D0%B9_%D0%B0%D0%BB%D0%B3%D0%BE%D1%80%D0%B8%D1%82%D0%BC_%D0%A1-%D1%81%D1%80%D0%B5%D0%B4%D0%BD%D0%B8%D1%85_(Fuzzy_C-means)
 def dist_to_clusters(points, centers, m=2):
 
     for point in points:
-        dists_to_clusters = []
         ps = []
         for center in centers:
-            dists_to_clusters.append(dist(point, center))
+            if dist(point, center) <= 0.01:
+                ps = point.ps
+                break
+            ps.append((1 / dist(point, center) ** (2 / (m - 1))))
+        
+        # dists_to_clusters = []
+        # ps = []
+        # for center in centers:
+        #     dists_to_clusters.append(dist(point, center))
 
-        sum_of_distances = sum(dists_to_clusters)
+        # sum_of_distances = sum(dists_to_clusters)
 
-        for distance in dists_to_clusters:
-            ps.append((distance / sum_of_distances) ** (2 / (1 - m)))
+        # if sum_of_distances == 0:
+        #     print(dists_to_clusters)
+        #     raise Exception
+
+        # for distance in dists_to_clusters:
+        #     ps.append((distance / sum_of_distances) ** (2 / (1 - m)))
 
         point.ps = ps
 
@@ -102,10 +114,10 @@ def get_max_elem(matrix1, matrix2):
 
     for i in range(len(matrix1)):
         for j in range(len(matrix1[0])):
+            # print(f"{matrix1[i][j]} - {matrix2[i][j]}")
             new_matrix[i][j] = abs(matrix1[i][j] - matrix2[i][j])
 
     return np.max(new_matrix)
-
 
 if __name__ == "__main__":
     k = 3
@@ -122,34 +134,55 @@ if __name__ == "__main__":
 
     past_matrix = np.zeros(shape=(len(random_points), k))
 
-    clusters_points = [[] for _ in range(k)]
+    iteration = 0
 
-    iter = 0
+    while iteration < 100:
 
-    while True:
-
-        print(iter)
+        print(iteration)
+        print(get_max_elem(past_matrix, p_matrix))
 
         if get_max_elem(past_matrix, p_matrix) <= e:
             break
 
-        clusters_points = [[] for _ in range(k)]
-
-        for point in random_points:
-            clusters_points[point.cluster].append(point)
-
         past_matrix = p_matrix
-        centers = list(map(new_center, clusters_points))
+        centers = []
+
+        T_p_matrix = p_matrix.T
+
+        for i in range(k):
+            sum_of_p = 0
+            sx = 0
+            sy = 0
+            for j, point in enumerate(random_points):
+                sx += point.x * (T_p_matrix[i][j] ** m)
+                sy += point.y * (T_p_matrix[i][j] ** m)
+                sum_of_p += T_p_matrix[i][j] ** m
+
+            # print(sum_of_p)
+            # print(sx)
+            # print(sy)
+            # raise Exception
+
+            centers.append(Point(sx / sum_of_p, sy / sum_of_p))
+
+        # for center in centers:
+        #     print(f"{random_points[0].x} {center.x} {center.y}")
 
         dist_to_clusters(random_points, centers, k)
         p_matrix = create_matrix(random_points, k)
 
-        iter += 1
+        iteration += 1
 
-    for cluster in clusters_points:
-        for point in cluster:
-            print(point.ps)
-        print("------------------")
+    clusters_points = [[] for _ in range(k)]
+
+    for point in random_points:
+        # print(point.cluster)
+        clusters_points[point.cluster].append(point)
+
+    # for cluster in clusters_points:
+    #     for point in cluster:
+    #         print(point.ps)
+    #     print("------------------")
 
     colors = []
     for cluster in clusters_points:
@@ -159,5 +192,5 @@ if __name__ == "__main__":
     for i, center in enumerate(centers):
         plt.scatter(center.x, center.y, linewidths=6, marker='v', color='black')
 
-    plt.savefig("res.png")
+    plt.savefig("res_c.png")
     plt.show()
