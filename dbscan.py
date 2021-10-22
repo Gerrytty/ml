@@ -7,10 +7,11 @@ points = []
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 YELLOW = (255, 255, 0)
+BLACK = (0, 0, 0)
 
 
 class Point:
-    def __init__(self, x, y, color=(0, 0, 0), cluster=0):
+    def __init__(self, x, y, color=BLACK, cluster=0):
         self.x = x
         self.y = y
         self.color = color
@@ -51,6 +52,7 @@ def pygame_draw(r=4):
                 # R button on keyboard
                 if event.key == pygame.K_r:
                     set_color()
+                # С button on keyboard
                 if event.key == pygame.K_c:
                     set_color()
                     set_new_color()
@@ -68,7 +70,7 @@ def set_color():
 
     for point in points:
         point.cluster = 0
-        point.color = (0, 0, 0)
+        point.color = BLACK
 
     for point in points:
         neighb = 0
