@@ -115,8 +115,9 @@ def plot_graph(N, nodes, title: str, weighted=True):
         for node in nodes:
             G.add_edge(node.from_index, node.to_index)
 
+    fig = plt.figure()
+    fig.suptitle(title)
     nx.draw_kamada_kawai(G, with_labels=True)
-    plt.title(title)
     plt.show()
 
 
@@ -143,11 +144,6 @@ def init_random_graph(N, prob_connection=0.7):
         # graph_edges.append(Node(edge[1], edge[0], random_weight))
 
     return list(set(graph_edges))
-
-
-def user_k():
-
-
 
 def get_k_clusters(K, N, nodes, plot=True, user_input=False):
 
@@ -183,7 +179,7 @@ def get_k_clusters(K, N, nodes, plot=True, user_input=False):
     print(result)
 
     if plot:
-        plot_graph(N, result, "К - cluster граф")
+        plot_graph(N, result, "К - cluster граф", False)
 
     return result
 
@@ -205,5 +201,6 @@ if __name__ == "__main__":
     # Рисуем исходный граф
     plot_graph(N, nodes, "Исходный граф", False)
 
-    # Чтобы ввести кастомное число кластеров нужно запустить эту функцию с аргументом user_input=True
+    # Чтобы ввести кастомное число кластеров нужно
+    # запустить эту функцию с аргументом user_input=True
     clusters = get_k_clusters(k, N, nodes)
