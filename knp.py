@@ -9,6 +9,7 @@ class Node:
         self.from_index = from_index
         self.to_index = to_index
         self.weight = weight
+        self.coef = 0
 
     def __str__(self):
         return f"{self.from_index} {self.to_index} {self.weight}"
@@ -28,7 +29,8 @@ def get_min_node(nodes, edges, v_dict):
 
     for node in nodes:
         # Пропускаем уже отмеченные ребра (против циклов)
-        if edges[node.from_index][node.to_index] == 0 and (v_dict[node.to_index] == 0 or v_dict[node.from_index] == 0):
+        # if edges[node.from_index][node.to_index] == 0 or v_dict[node.from_index] == 0):
+        if node.coef == 0 and (v_dict[node.to_index] == 0 or v_dict[node.from_index] == 0):
             # Ищем среди не изолированных вершин
             if node.weight < min_weight and (v_dict[node.from_index] != 0 or v_dict[node.to_index] != 0):
                 min_weight = node.weight
@@ -79,11 +81,16 @@ def knp(N, nodes):
 
         result.append(min_node)
 
-        # Путь из вершины 1 в вершину 2 = путь из вершины 2 в вершину 1
-        edges[min_node.from_index][min_node.to_index] = 1
-        edges[min_node.to_index][min_node.from_index] = 1
+        # # Путь из вершины 1 в вершину 2 = путь из вершины 2 в вершину 1
+        # edges[min_node.from_index][min_node.to_index] = 1
+        # edges[min_node.to_index][min_node.from_index] = 1
+
+        # Увеличиваем степени вершин, для этого ребра
         v_dict[min_node.from_index] += 1
         v_dict[min_node.to_index] += 1
+
+        # Отмечаем ребро как уже пройденное
+        min_node.coef = 1
 
         # Ищем найти изолированную точку, ближайшую к некоторой
         # неизолированной
@@ -136,7 +143,7 @@ def init_random_graph(N, prob_connection=0.7):
     return list(set(graph_edges))
 
 
-def get_k_clusters(K, N, nodes, plot=True):
+def get_k_clusters(K, N, nodes, plot=True, user_input=False):
     result = knp(N, nodes)
 
     if plot:
@@ -147,17 +154,17 @@ def get_k_clusters(K, N, nodes, plot=True):
     result.sort(key=lambda x: x.weight, reverse=True)
 
     # Графический способ определения числа кластеров
-    if plot:
+    if user_input:
         start = 0
         for r in result:
             plt.plot([start, start + r.weight], [0, 0], linewidth=12)
             start += r.weight
         plt.show()
 
-    user_k = input("Ведите k (Чтобы пропустить этот шаг и взять дефолтное число k нажмите Enter): ")
+        user_k = input("Ведите k (Чтобы пропустить этот шаг и взять дефолтное число k нажмите Enter): ")
 
-    if user_k.isnumeric():
-        K = int(user_k)
+        if user_k.isnumeric():
+            K = int(user_k)
 
     print(f"k = {K}")
 
@@ -168,7 +175,7 @@ def get_k_clusters(K, N, nodes, plot=True):
     print(result)
 
     if plot:
-        plot_graph(N, result, "К - cluster граф", False)
+        plot_graph(N, result, "К - cluster граф")
 
     return result
 
@@ -179,12 +186,12 @@ requirement:
 """
 if __name__ == "__main__":
     # Кол-во вершин в графе
-    N = 6
+    N = 10
 
     # Кол-во кластеров
     k = 2
 
-    nodes = init_random_graph(N)
+    nodes = init_random_graph(N, 0.5)
 
     # Рисуем исходный граф
     plot_graph(N, nodes, "Исходный граф", False)
