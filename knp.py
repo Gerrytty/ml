@@ -40,6 +40,7 @@ def get_min_node(nodes, edges, v_dict):
 
 
 def knp(N, nodes):
+    # Матрица смежности финального остовного дерева
     edges = np.zeros((N, N))
 
     # Создаем словарь индекс вершины:соединенные вершины
@@ -92,7 +93,7 @@ def knp(N, nodes):
         # Отмечаем ребро как уже пройденное
         min_node.coef = 1
 
-        # Ищем найти изолированную точку, ближайшую к некоторой
+        # Ищем изолированную точку, ближайшую к некоторой
         # неизолированной
         min_node = get_min_node(nodes, edges, v_dict)
 
@@ -130,7 +131,8 @@ def init_random_graph(N, prob_connection=0.7):
     graph = nx.erdos_renyi_graph(N, prob_connection)
 
     # Если наш рандомный граф получился хоть с одной изолированной вершиной
-    if any([x[1] for x in graph.degree()]) == 0:
+    # или с изолированными подграфами
+    if not nx.is_connected(graph):
         return init_random_graph(N, prob_connection)
 
     edges_list = list(graph.edges)
@@ -143,12 +145,18 @@ def init_random_graph(N, prob_connection=0.7):
     return list(set(graph_edges))
 
 
+def user_k():
+
+
+
 def get_k_clusters(K, N, nodes, plot=True, user_input=False):
+
+    # Остновное дерево на входном графе
     result = knp(N, nodes)
 
     if plot:
         # Рисуем финальный граф (остовное дерево)
-        plot_graph(N, result, "Финальный граф")
+        plot_graph(N, result, "Финальный граф", False)
 
     # Сортируем в порядке убывания
     result.sort(key=lambda x: x.weight, reverse=True)
@@ -185,15 +193,17 @@ requirement:
 библиотека networkx
 """
 if __name__ == "__main__":
+
     # Кол-во вершин в графе
     N = 10
 
     # Кол-во кластеров
     k = 2
 
-    nodes = init_random_graph(N, 0.5)
+    nodes = init_random_graph(N)
 
     # Рисуем исходный граф
     plot_graph(N, nodes, "Исходный граф", False)
 
+    # Чтобы ввести кастомное число кластеров нужно запустить эту функцию с аргументом user_input=True
     clusters = get_k_clusters(k, N, nodes)
